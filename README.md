@@ -1,2 +1,1 @@
-# istio-by-example
-Istio by Example
+# Istio by Example
