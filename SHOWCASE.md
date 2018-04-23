@@ -2,6 +2,7 @@
 
 ## (0) Open current environment
 ```sh
+kubectl proxy --port=8001 &
 #Application endpoint
 open http://localhost/productpage
 #Kubernetes Dashboard
@@ -33,66 +34,81 @@ open https://istio.io/docs/tasks/telemetry/using-istio-dashboard.html
 istioctl create -f telemetry.yaml
 ```
 
-wget -P /usr/local/bin https://github.com/adersberger/slapper/releases/download/0.1/slapper
-
-slapper -rate 10 -targets ./target -workers 8 -maxY 15s
-
-see https://github.com/ikruglov/slapper
-
-
 ## (2) Diagnosability: Logs
-Logs:
+```sh
 kubectl -n istio-system logs $(kubectl -n istio-system get pods -l istio=mixer -o jsonpath='{.items[0].metadata.name}') mixer | grep \"instance\":\"newlog.logentry.istio-system\"
 
-## (2) Diagnosability: Traces
+kubectl apply -f logging-stack.yaml
+istioctl create -f fluentd-istio.yaml
+kubectl expose deployment kibana --name=kibana-expose --port=5601 --target-port=5601 --type=LoadBalancer -n=logging
 
-#ServiceGraph
+open http://localhost:5601/app/kibana
+```
+
+see https://istio.io/docs/tasks/telemetry/fluentd.html
+
+## (3) Diagnosability: Traces
+
+###ServiceGraph
+```sh
 kubectl apply -f istio-*/install/kubernetes/addons/servicegraph.yaml
 kubectl expose deployment servicegraph --name=servicegraph-expose --port=8088 --target-port=8088 --type=LoadBalancer -n=istio-system
 open http://localhost:8088/dotviz
+```
 
-#Jaeger
+###Jaeger
+```sh
 kubectl apply -n istio-system -f 
 https://raw.githubusercontent.com/jaegertracing/jaeger-kubernetes/master/all-in-one/jaeger-all-in-one-template.yml
 
 kubectl expose deployment jaeger-deployment --name=jaeger-expose --port=16686 --target-port=16686 --type=LoadBalancer -n=istio-system
 
 open http://127.0.0.1:16686
+```
 
-echo "GET http://localhost/productpage" | vegeta attack -duration=20s -rate=5 | tee results.bin | vegeta report
+^
+IMPORTANT: Header propagation / forwarding / relay required by application to remain traces
 
-## (3) Traffic Management: Blue/Green Deployment, Dark Launches
+## (4) Perform load test
 
-send all traffic for the user "jason" to the reviews:v2, meaning they'll only see the black stars.
+```sh
+wget -P /usr/local/bin https://github.com/adersberger/slapper/releases/download/0.1/slapper
+slapper -rate 10 -targets ./target -workers 8 -maxY 15s
+```
+see https://github.com/ikruglov/slapper
 
-cat route-rule-reviews-test-v2.yaml
+## (5) Canary Releases
 
+Send all traffic for the user "jason" to the reviews:v2, meaning they'll only see the black stars.
+
+```sh
 istioctl create -f route-rule-reviews-test-v2.yaml
-
 #open BookInfo application and login as user jason (password jason)
 open http://localhost/productpage
-
-## (4) Traffic Management: Canary Releases, A/B Testing
-
-The ability to split traffic for testing and rolling out changes is important. This allows for A/B variation testing or deploying canary releases.
+```
 
 The rule below ensures that 50% of the traffic goes to reviews:v1 (no stars), or reviews:v3 (red stars).
 
-cat route-rule-reviews-50-v3.yaml
-
+```sh
 istioctl create -f route-rule-reviews-50-v3.yaml
+#open BookInfo application and logout 
+open http://localhost/productpage
+```
 
-#logout 
+Given the above approach, if the canary release were successful then we'd want to move 100% of the traffic to reviews:v3. This can be done by updating the route with new weighting and rules.
 
-Given the above approach, if the canary release were successful then we'd want to move 100% of the traffic to reviews:v3.
-
-This can be done by updating the route with new weighting and rules.
-
+```sh
 istioctl replace -f route-rule-reviews-v3.yaml
-
 istioctl get routerules
-
 istioctl delete routerule reviews-default -n default
 istioctl delete routerule reviews-test-v2 -n default
+```
 
-Istioctl documentation: https://istio.io/docs/reference/commands/istioctl.html
+## (7) mTLS
+
+```sh
+kubectl get configmap istio -o yaml -n istio-system | grep authPolicy | head -1
+kubectl get pods -l app=productpage
+kubectl exec -it productpage-v1-84f77f8747-zfdqt -c istio-proxy /bin/bash
+ls /etc/certs/
+```

@@ -37,7 +37,7 @@ open http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernet
 
  export PATH=$PWD/bin:$PATH
 
- kubectl apply -f istio-*/install/kubernetes/istio.yaml
+ kubectl apply -f install/kubernetes/istio-auth.yaml
 
  kubectl get pods -n istio-system
   ```
