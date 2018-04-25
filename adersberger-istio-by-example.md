@@ -37,11 +37,6 @@ background-color: 283D8F
 ![](img/adersberger-istio-by-example/adersberger-istio-by-example.002.png)
 
 [.hide-footer]
----
-
-![](img/adersberger-istio-by-example/adersberger-istio-by-example.003.png)
-
-[.hide-footer]
 
 ---
 
@@ -370,6 +365,10 @@ spec:
         baseEjectionTime: 3m
         maxEjectionPercent: 100
  ```
+---
+
+#https://github.com/adersberger/istio-by-example
+
 ---
 ![](img/final-slide.png)
 

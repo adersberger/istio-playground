@@ -25,7 +25,6 @@ open http://localhost:9090/graph?g0.range_input=1h&g0.expr=istio_double_request_
 kubectl apply -f istio-*/install/kubernetes/addons/grafana.yaml
 kubectl expose deployment grafana --name=grafana-expose --port=3000 --target-port=3000 --type=LoadBalancer -n=istio-system
 open http://localhost:3000/d/1/istio-dashboard
-open https://istio.io/docs/tasks/telemetry/using-istio-dashboard.html
 ```
 
 ### Deploy Istio telemetry definition
@@ -44,9 +43,6 @@ kubectl expose deployment kibana --name=kibana-expose --port=5601 --target-port=
 
 open http://localhost:5601/app/kibana
 ```
-
-see https://istio.io/docs/tasks/telemetry/fluentd.html
-
 ## (3) Diagnosability: Traces
 
 ###ServiceGraph
@@ -73,7 +69,7 @@ IMPORTANT: Header propagation / forwarding / relay required by application to re
 
 ```sh
 wget -P /usr/local/bin https://github.com/adersberger/slapper/releases/download/0.1/slapper
-slapper -rate 10 -targets ./target -workers 8 -maxY 15s
+slapper -rate 4 -targets ./target -workers 2 -maxY 15s
 ```
 see https://github.com/ikruglov/slapper
 
