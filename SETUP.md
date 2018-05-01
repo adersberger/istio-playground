@@ -14,14 +14,14 @@ kubectl config use-context docker-for-desktop
  kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
  ```
  
-### (4) Extract id of default service account token
+### (4) Extract id of default service account token (referred as TOKENID)
 ```sh
 kubectl describe serviceaccount default
 ```
 
 ### (5) Grab token and insert it into k8s Dashboard UI auth dialog
 ```sh
-kubectl describe secret default-token-ID
+kubectl describe secret TOKENID
 ```
 
 ### (6) Start local proxy 
@@ -35,9 +35,13 @@ open http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernet
  ```sh
  curl -L https://git.io/getLatestIstio | sh -
 
+ cd istio-*
+
  export PATH=$PWD/bin:$PATH
 
- kubectl apply -f install/kubernetes/istio-auth.yaml
+ cd ..
+
+ kubectl apply -f istio-*/install/kubernetes/istio-auth.yaml
 
  kubectl get pods -n istio-system
   ```
@@ -83,7 +87,7 @@ open https://istio.io/docs/guides/bookinfo.html
 
 ... and check that the sidecar container is present within the Pod.
 
-## (11) Deploy Weave Scope
+## (11, optional) Deploy Weave Scope
 
 ```sh
 kubectl apply -f "https://cloud.weave.works/k8s/scope.yaml?k8s-version=$(kubectl version | base64 | tr -d '\n')"

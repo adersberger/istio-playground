@@ -1,0 +1,1 @@
+exec istio-*/samples/bookinfo/kube/cleanup.sh

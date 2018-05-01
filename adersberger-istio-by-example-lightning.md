@@ -1,93 +1,96 @@
-footer: Istio by Example, @adersberger, KubeCon & CloudNativeCon EU 2018
 background-color: 283D8F
 
 ![](img/header-slide.png)
 
-[.hide-footer]
+^ Hey! I'm Josef and this my talk on Istio - by example!
 
 ---
 
 # Why?
 
+^ You might ask why another Istio talk...
+^ The answer is...
+
 ---
 
 ![fit](img/book.png)
 
-^ because it's the hottest shit on earth
-
-[.hide-footer]
+^ Istio and service meshes are a hype right now
+^ out job is to ground this hype by providing real-life use cases
+^ so what is Istio in 20 seconds?
 
 ---
 
 ![](img/adersberger-istio-by-example/adersberger-istio-by-example.001.jpeg)
 
-[.hide-footer]
+^ microservice applications do have a lot of crosscutting concerns to address to be cloud native
 
 ---
 ![](img/adersberger-istio-by-example/adersberger-istio-by-example.002.png)
 
-[.hide-footer]
+^ these concerns can be addressed by libraries
+
 ---
 # Library Bloat
 ![](img/adersberger-istio-by-example/adersberger-istio-by-example.002.png)
 
-[.hide-footer]
+^ but this leads to a library bloat
 
 ---
 
 ![](img/adersberger-istio-by-example/adersberger-istio-by-example.006.png)
 
-[.hide-footer]
+^ so the idea is to move those concerns from the application side to the infrastructure side
 
 ---
 
 ![](img/adersberger-istio-by-example/adersberger-istio-by-example.007.png)
 
-[.hide-footer]
+^ and this is where Istio comes up. It unburdens cloud native applications to address crosscutting concerns by themselves.
 
 ---
 #Setting the sails with Istio
 ![](img/purple-3054804.jpg)
 
----
-Features
-
-
-| Traffic Management | Resiliency | Security | Observability |
-| --- | --- | --- | --- |
-| Request Routing | Timeouts | mTLS | Metrics |
-| Load Balancing | Circuit Breaker | Access Control | Logs |
-| Traffic Shifting | Health Checks (active, passive) | Workload Identity | Traces|
-| Traffic Mirroring | Retries | RBAC |  |
-| Service Discovery | Rate Limiting |  |  |
-| Ingress, Egress | Delay & Fault Injection |  |  |
+^ now let's dig into Istio - example by example
+^ first task is to setup a Istio mesh
 
 ---
+# Baby step: Install a (local) Kubernetes cluster
 
-# Deploy Observability Add-Ons
+![fit](img/docker.png)
+
+^ it all begins with a k8s cluster
+
+---
+# Step 1: Deploy Istio and a Sample Application
+
+![fit](img/setup-istio.png)
+
+[Video](https://asciinema.org/a/mHs3nesM9oOwOiESleaWwe5Jw)
+
+^ then you've to deploy Istio itself and a sample application
+
+---
+# Step 2: Deploy Istio Observability Stack
+
+![fit](img/setup-istio-observability.png)
+
+[Video](https://asciinema.org/a/oZMovBrx0TpP2AS7UNTLslI6P)
+
+^ along with Istio you've to deploy an Observability stack
+
+---
+# Stimulate!
  ```zsh
-#Prometheus
-kubectl apply -f istio-*/install/kubernetes/addons/prometheus.yaml
-kubectl expose deployment prometheus --name=prometheus-expose 
-        --port=9090 --target-port=9090 --type=LoadBalancer -n=istio-system
+wget -P /usr/local/bin https://github.com/adersberger/slapper/releases/download/0.1/slapper
 
-#Grafana
-kubectl apply -f istio-*/install/kubernetes/addons/grafana.yaml
-kubectl expose deployment grafana --name=grafana-expose 
-        --port=3000 --target-port=3000 --type=LoadBalancer -n=istio-system
+slapper -rate 4 -targets ./target -workers 2 -maxY 15s
+ ```
 
-#Jaeger
-kubectl apply -n istio-system -f 
-https://raw.githubusercontent.com/jaegertracing/jaeger-kubernetes/
-master/all-in-one/jaeger-all-in-one-template.yml
-kubectl expose deployment jaeger-deployment --name=jaeger-expose 
-        --port=16686 --target-port=16686 --type=LoadBalancer -n=istio-system
-
-#EFK
-kubectl apply -f logging-stack.yaml
-kubectl expose deployment kibana --name=kibana-expose 
-        --port=5601 --target-port=5601 --type=LoadBalancer -n=logging
-```
+^ now let's stimulate the sample application and have a look on what we can observe
+^ with this stack in place you're now able to play around with Istio
+^ I'm coming to an end by flipping through the toys you can use 
 
 ---
 # Canary Releases: A/B Testing
@@ -238,10 +241,44 @@ spec:
         maxEjectionPercent: 100
  ```
 ---
+# Resiliency: Latency Injection
+```yaml
+apiVersion: config.istio.io/v1alpha2
+kind: RouteRule
+metadata:
+  name: ratings-delay
+spec:
+  destination:
+    name: reviews
+  route:
+  - labels:
+      version: v1
+  httpFault:
+    delay:
+      percent: 10
+      fixedDelay: 5s
+ ```
+---
+# Resiliency: Error Injection
+```yaml
+apiVersion: config.istio.io/v1alpha2
+kind: RouteRule
+metadata:
+  name: ratings-abort
+spec:
+   destination:
+     name: ratings
+   route:
+   - labels:
+       version: v1
+   httpFault:
+     abort:
+       percent: 10
+       httpStatus: 400
+ ```
+---
 
 #https://github.com/adersberger/istio-by-example
 
 ---
 ![](img/final-slide.png)
-
-[.hide-footer]
