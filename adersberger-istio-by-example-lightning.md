@@ -8,59 +8,69 @@ background-color: 283D8F
 
 # Why?
 
-^ You might ask why another Istio talk...
-^ The answer is...
+^ 
+You might ask why another Istio talk...
+The answer is...
 
 ---
 
 ![fit](img/book.png)
 
-^ Istio and service meshes are a hype right now
-^ out job is to ground this hype by providing real-life use cases
-^ so what is Istio in 20 seconds?
+^ 
+Istio and service meshes are a hype right now
+Our job is to ground this hype by providing real-life use cases
+So what is Istio in 20 seconds?
 
 ---
 
 ![](img/adersberger-istio-by-example/adersberger-istio-by-example.001.jpeg)
 
-^ microservice applications do have a lot of crosscutting concerns to address to be cloud native
+^ 
+microservice applications do have a lot of crosscutting concerns to address to be cloud native
 
 ---
 ![](img/adersberger-istio-by-example/adersberger-istio-by-example.002.png)
 
-^ these concerns can be addressed by libraries
+^ 
+these concerns can be addressed by libraries
 
 ---
 # Library Bloat
 ![](img/adersberger-istio-by-example/adersberger-istio-by-example.002.png)
 
-^ but this leads to a library bloat
+^ 
+but this leads to a library bloat
 
 ---
 
 ![](img/adersberger-istio-by-example/adersberger-istio-by-example.006.png)
 
-^ so the idea is to move those concerns from the application side to the infrastructure side
+^ 
+so the idea is to move those concerns from the application side to the infrastructure side
 
 ---
 
 ![](img/adersberger-istio-by-example/adersberger-istio-by-example.007.png)
 
-^ and this is where Istio comes up. It unburdens cloud native applications to address crosscutting concerns by themselves.
+^ 
+and this is where Istio comes up:
+It unburdens cloud native applications to address crosscutting concerns by themselves.
 
 ---
 #Setting the sails with Istio
 ![](img/purple-3054804.jpg)
 
-^ now let's dig into Istio - example by example
-^ first task is to setup a Istio mesh
+^ 
+now let's dig into Istio - example by example
+first task is to setup a Istio mesh
 
 ---
 # Baby step: Install a (local) Kubernetes cluster
 
 ![fit](img/docker.png)
 
-^ it all begins with a k8s cluster
+^ 
+it all begins with a k8s cluster
 
 ---
 # Step 1: Deploy Istio and a Sample Application
@@ -69,7 +79,8 @@ background-color: 283D8F
 
 [Video](https://asciinema.org/a/mHs3nesM9oOwOiESleaWwe5Jw)
 
-^ then you've to deploy Istio itself and a sample application
+^ 
+then you've to deploy Istio itself and a sample application
 
 ---
 # Step 2: Deploy Istio Observability Stack
@@ -78,7 +89,8 @@ background-color: 283D8F
 
 [Video](https://asciinema.org/a/oZMovBrx0TpP2AS7UNTLslI6P)
 
-^ along with Istio you've to deploy an Observability stack
+^ 
+along with Istio you've to deploy an Observability stack
 
 ---
 # Stimulate!
@@ -88,9 +100,10 @@ wget -P /usr/local/bin https://github.com/adersberger/slapper/releases/download/
 slapper -rate 4 -targets ./target -workers 2 -maxY 15s
  ```
 
-^ now let's stimulate the sample application and have a look on what we can observe
-^ with this stack in place you're now able to play around with Istio
-^ I'm coming to an end by flipping through the toys you can use 
+^ 
+now let's stimulate the sample application and have a look on what we can observe
+with this stack in place you're now able to play around with Istio
+I'm coming to an end by flipping through the toys you can use 
 
 ---
 # Canary Releases: A/B Testing
