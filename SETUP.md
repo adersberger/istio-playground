@@ -41,7 +41,7 @@ open http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernet
 
  cd ..
 
- kubectl apply -f istio-*/install/kubernetes/istio-auth.yaml
+ kubectl apply -f install/kubernetes/istio-demo-auth.yaml
 
  kubectl get pods -n istio-system
   ```
