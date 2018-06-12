@@ -101,7 +101,7 @@ Features
 ![](img/istio-arch.png)
 
 ^ 
- * Pilot: Watches services and transforms this information in a canonicla platform-agnostic model. The envoy configuration is then derived from this canonical model. Exposes the Rules API to add traffic management rules (used by Istioctl).
+ * Pilot: Watches services and transforms this information in a canonical platform-agnostic model. The envoy configuration is then derived from this canonical model. Exposes the Rules API to add traffic management rules (used by Istioctl).
  * Envoy: Sidecar proxy per microservice that handles ingress/egress traffic
  * Mixer: Policy / precondition checks and telemetry. Highly scalable. Envoy caches policy rules and buffers telemetry data locally.
  https://istio.io/blog/2017/mixer-spof-myth.html
@@ -114,9 +114,9 @@ Features
 ---
 # Workshop prerequisites
 
+ * Bash
  * git Client
- * Text editor (like Atom)
-
+ * Text editor (like VS.Code)
 
 ---
 # Baby step: Install a (local) Kubernetes cluster
@@ -129,12 +129,17 @@ https://www.docker.com/community-edition
 it all begins with a k8s cluster
 
 ---
+# The ultimate guide to fix strange k8s behavior
+
+![inline](img/docker-mac.png)
+
+---
 # Setup Kubernetes environment
  ```sh
 # Switch k8s context
 kubectl config use-context docker-for-desktop
 # Deploy k8s dashboard
- kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
+kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
 # Extract id of default service account token (referred as TOKENID)
 kubectl describe serviceaccount default
 # Grab token and insert it into k8s Dashboard UI auth dialog
@@ -256,46 +261,71 @@ Login is allowed with any combination of username and password.
 
 # Deploy Observability Add-Ons
  ```zsh
-#Prometheus
-kubectl apply -f istio-*/install/kubernetes/addons/prometheus.yaml
-kubectl expose deployment prometheus --name=prometheus-expose 
-        --port=9090 --target-port=9090 --type=LoadBalancer -n=istio-system
+#Metrics: Prometheus
+kubectl expose deployment prometheus --name=prometheus-expose --port=9090 --target-port=9090 --type=LoadBalancer -n=istio-system
 
-#Grafana
-kubectl apply -f istio-*/install/kubernetes/addons/grafana.yaml
-kubectl expose deployment grafana --name=grafana-expose 
-        --port=3000 --target-port=3000 --type=LoadBalancer -n=istio-system
+open http://localhost:9090/graph?g0.range_input=1h&g0.expr=istio_request_count&g0.tab=0
 
-#Jaeger
-kubectl apply -n istio-system -f 
-https://raw.githubusercontent.com/jaegertracing/jaeger-kubernetes/
-master/all-in-one/jaeger-all-in-one-template.yml
-kubectl expose deployment jaeger-deployment --name=jaeger-expose 
-        --port=16686 --target-port=16686 --type=LoadBalancer -n=istio-system
+#Metrics: Grafana
+kubectl expose deployment grafana --name=grafana-expose --port=3000 --target-port=3000 --type=LoadBalancer -n=istio-system
+
+open http://localhost:3000/d/1/istio-dashboard
+
+#Tracing: Jaeger
+kubectl expose deployment istio-tracing --name=tracing-expose --port=16686 --target-port=16686 --type=LoadBalancer -n=istio-system
+
+open http://localhost:16686
 
 #EFK
 kubectl apply -f logging-stack.yaml
-kubectl expose deployment kibana --name=kibana-expose 
-        --port=5601 --target-port=5601 --type=LoadBalancer -n=logging
-```
----
-
-# Observe Services
- ```zsh
-# Logs
+kubectl expose deployment kibana --name=kibana-expose --port=5601 --target-port=5601 --type=LoadBalancer -n=logging
 istioctl create -f fluentd-istio.yaml
-# Metrics
-istioctl create -f telemetry.yaml
+open http://localhost:5601/app/kibana
 ```
+^ create index pattern (*)
+
 ---
-
-![](img/adersberger-istio-by-example/adersberger-istio-by-example.009.png)
-
-^
-B. Ibryam and R. Huss, Kubernetes Patterns, https://leanpub.com/k8spatterns
-
-[.hide-footer]
-
+ ```zsh
+ # Configuration for logentry instances
+apiVersion: "config.istio.io/v1alpha2"
+kind: logentry
+metadata:
+  name: newlog
+  namespace: istio-system
+spec:
+  severity: '"info"'
+  timestamp: request.time
+  variables:
+    source: source.labels["app"] | source.service | "unknown"
+    user: source.user | "unknown"
+    destination: destination.labels["app"] | destination.service | "unknown"
+    responseCode: response.code | 0
+    responseSize: response.size | 0
+    latency: response.duration | "0ms"
+  monitored_resource_type: '"UNSPECIFIED"'
+---
+# Configuration for a fluentd handler
+apiVersion: "config.istio.io/v1alpha2"
+kind: fluentd
+metadata:
+  name: handler
+  namespace: istio-system
+spec:
+  address: "fluentd-es.logging:24224"
+---
+# Rule to send logentry instances to the fluentd handler
+apiVersion: "config.istio.io/v1alpha2"
+kind: rule
+metadata:
+  name: newlogtofluentd
+  namespace: istio-system
+spec:
+  match: "true" # match for all requests
+  actions:
+   - handler: handler.fluentd
+     instances:
+     - newlog.logentry
+```
 ---
 
 # Stimulate!
@@ -308,7 +338,30 @@ slapper -rate 4 -targets ./target -workers 2 -maxY 15s
 ^ 
 now let's stimulate the sample application and have a look on what we can observe
 with this stack in place you're now able to play around with Istio
-I'm coming to an end by flipping through the toys you can use 
+I'm coming to an end by flipping through the toys you can use. Key bindings:
+q, ctrl-c - quit
+r - reset stats
+k - increase rate by 100 RPS
+j - decrease rate by 100 RPS
+
+---
+# Slapper[^2] in action
+![inline](img/slapper.png)
+
+[^2]: Key bindings:
+q, ctrl-c - quit
+r - reset stats
+k - increase rate by 100 RPS
+j - decrease rate by 100 RPS
+
+---
+
+![](img/adersberger-istio-by-example/adersberger-istio-by-example.009.png)
+
+^
+B. Ibryam and R. Huss, Kubernetes Patterns, https://leanpub.com/k8spatterns
+
+[.hide-footer]
 
 ---
 # Canary Releases: A/B Testing
@@ -507,3 +560,5 @@ spec:
  * Auth Policy with mTLS & JWT (https://istio.io/docs/tasks/security/authn-policy)
  * Istio CA/Auth -> Citadel incl. Multi-Cluster 
  * Kubernetes Bugfix Cheat Sheet
+ * Windows variant
+ * Troubleshooting: 3 cores
