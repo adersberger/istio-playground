@@ -1,8 +1,6 @@
-# Istio by Example
+# Istio Playground
 
- * [Setup environment (based on Docker for Mac Edge with Kubernetes)](SETUP.md)
- * [Istio by example showcase](SHOWCASE.md)
- * [Slidedeck](https://github.com/adersberger/istio-by-example/blob/master/adersberger-istio-by-example.pdf)
+ * [Slidedeck](https://github.com/adersberger/istio-by-example/blob/master/slides/)
 
 ## References
  * http://blog.christianposta.com/istio-workshop/slides/#/69
