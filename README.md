@@ -4,6 +4,7 @@
  * [Istio Toys](https://istio.io/docs/tasks/)
 
 ## References
+ * https://katacoda.com/courses/istio
  * http://blog.christianposta.com/istio-workshop/slides/#/69
  * https://youtu.be/s4qasWn_mFc
  * https://www.slideshare.net/RedHatDevelopers/istio-canaries-and-kubernetes
