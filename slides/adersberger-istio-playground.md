@@ -99,6 +99,10 @@ first task is to setup a Istio mesh
  https://istio.io/docs/concepts/security/mutual-tls.html
 
 [.hide-footer]
+---
+# Istio Abstractions
+
+![inline](../img/conceptmap.png)
 
 ---
 # Workshop Prerequisites
@@ -112,6 +116,8 @@ first task is to setup a Istio mesh
 
 ```sh
 git clone https://github.com/adersberger/istio-playground
+
+cd istio-playground/code
 ```
 
 ---
@@ -500,9 +506,9 @@ Time to Play!
 | Load Balancing | Circuit Breaker | Role-Based Access Control | Logs |
 | Traffic Shifting | Health Checks (active, passive) | Workload Identity | Traces|
 | Traffic Mirroring | Retries | Authentication Policies |  |
-| Service Discovery | Rate Limiting |  |  |
+| Service Discovery | Rate Limiting | CORS Handling |  |
 | Ingress, Egress | Delay & Fault Injection |  |  |
-| API Specification |  |  |  |
+| API Specification | Connection Pooling  |  |  |
 
 https://istio.io/docs/tasks
 
