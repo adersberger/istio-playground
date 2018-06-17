@@ -506,5 +506,3 @@ https://istio.io/docs/tasks
 ---
 
 ![](../img/final-slide.png)
-
----
