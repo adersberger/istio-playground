@@ -14,3 +14,12 @@
  * http://blog.christianposta.com/istio-workshop/slides/#/69
  * https://youtu.be/s4qasWn_mFc
  * https://www.slideshare.net/RedHatDevelopers/istio-canaries-and-kubernetes
+ 
+== Maintainer
+
+Josef Adersberger (@adersberger)
+
+== License
+
+The software and documentation is provided under the MIT open source license,
+read the `LICENSE` file for details.
