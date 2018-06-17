@@ -1,5 +1,9 @@
 <img src="https://github.com/adersberger/istio-playground/raw/master/logo.png" width=25% />
 
+![Maintenance](https://img.shields.io/badge/maintained-yes-green.svg)
+![Istio Version](https://img.shields.io/badge/istio--version-0.8-blue.svg)
+![License](https://img.shields.io/packagist/l/doctrine/orm.svg)
+
 # Istio Playground
  * current Istio version on the playground: [0.8](https://istio.io/about/notes/0.8)
  * [Slidedeck](https://github.com/adersberger/istio-by-example/blob/master/slides/)
