@@ -2,7 +2,7 @@ background-color: 283D8F
 
 # Istio Playground
 
-![](../img/playground.jpg)
+![fit](../logo.png)
 
 @adersberger @qaware
 
@@ -11,10 +11,6 @@ background-color: 283D8F
 ---
 
 # Why?
-
-^ 
-You might ask why another Istio talk...
-The answer is...
 
 ---
 
@@ -98,8 +94,8 @@ first task is to setup a Istio mesh
  * Envoy: Sidecar proxy per microservice that handles ingress/egress traffic
  * Mixer: Policy / precondition checks and telemetry. Highly scalable. Envoy caches policy rules and buffers telemetry data locally.
  https://istio.io/blog/2017/mixer-spof-myth.html
- * Ingress/Egress: Inbound and outbound gateway. Nothing more than a Pod with an Envoy.
- * Istio Auth: CA for service-to-service authx and encryption. Certs are delivered as a secret volume mount. Workload identity is provided by SPIFFE.
+ * Ingress/Egress: Inbound and outbound gateway. Nothing more than an managed Envoy.
+ * Citadel: CA for service-to-service authx and encryption. Certs are delivered as a secret volume mount. Workload identity is provided by SPIFFE.
  https://istio.io/docs/concepts/security/mutual-tls.html
 
 [.hide-footer]
@@ -430,6 +426,7 @@ spec:
         host: reviews
         subset: v1
 ```
+^ difference to Kubernetes: Istio is on Service-level, Kubernetes more on Pod-level
 
 ---
 # Canary Releases: A/B Testing
@@ -495,11 +492,12 @@ Time to Play!
 | Traffic Management | Resiliency | Security | Observability |
 | --- | --- | --- | --- |
 | Request Routing | Timeouts | mTLS | Metrics |
-| Load Balancing | Circuit Breaker | Access Control | Logs |
+| Load Balancing | Circuit Breaker | Role-Based Access Control | Logs |
 | Traffic Shifting | Health Checks (active, passive) | Workload Identity | Traces|
-| Traffic Mirroring | Retries | RBAC |  |
-| Service Discovery | Rate Limiting | Authentication Policies |  |
+| Traffic Mirroring | Retries | Authentication Policies |  |
+| Service Discovery | Rate Limiting |  |  |
 | Ingress, Egress | Delay & Fault Injection |  |  |
+| API Specification |  |  |  |
 
 https://istio.io/docs/tasks
 
