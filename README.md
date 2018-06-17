@@ -1,3 +1,5 @@
+<img src="https://github.com/adersberger/istio-playground/raw/master/logo.png" width=25% />
+
 # Istio Playground
  * current Istio version on the playground: [0.8](https://istio.io/about/notes/0.8)
  * [Slidedeck](https://github.com/adersberger/istio-by-example/blob/master/slides/)
