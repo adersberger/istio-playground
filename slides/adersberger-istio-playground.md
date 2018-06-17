@@ -156,10 +156,11 @@ open http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernet
 curl -L https://git.io/getLatestIstio | sh -
 cd istio-0.8.0
 export PATH=$PWD/bin:$PATH
+istioctl
 
-# deploy Istio with mTLS enabled by default 
+# deploy Istio
 # (demo setting, default depplyment is via Helm)
-kubectl apply -f install/kubernetes/istio-demo-auth.yaml
+kubectl apply -f install/kubernetes/istio-demo.yaml
 kubectl get pods -n istio-system
 
 # label default namespace to be auto-sidecarred
@@ -298,6 +299,7 @@ open http://localhost:8088/dotviz
 # Deploy Missing Observability Feature: Log Analysis (EFK)
 
  ```zsh
+cd ..
 kubectl apply -f logging-stack.yaml
 kubectl expose deployment kibana --name=kibana-expose 
   --port=5601 --target-port=5601 --type=LoadBalancer -n=logging
@@ -305,8 +307,9 @@ istioctl create -f fluentd-istio.yaml
 open http://localhost:5601/app/kibana
 ```
 
- * Use * as the index pattern
- * Select @timestamp as the Time Filter field name
+ * Perform some requests to the BookInfo application
+ * Use `*` as the index pattern
+ * Select `@timestamp` as the time filter field name
 
 ---
 # fluentd-istio.yaml (1/3)
@@ -390,6 +393,8 @@ j - decrease rate by 100 RPS
 # Observability Outlook: Kiali
 
 ![inline](../img/kiali-graph.png)
+
+^ https://github.com/kiali/kiali
 
 ---
 # Release Patterns
