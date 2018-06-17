@@ -10,16 +10,16 @@
  * [Istio Toys](https://istio.io/docs/tasks/)
  * Plan B: [use GKE (account required)](https://istio.io/docs/setup/kubernetes/quick-start-gke-dm), [use Katacoda, only v0.7.1](https://katacoda.com/courses/istio)
 
-## References
+# References
  * http://blog.christianposta.com/istio-workshop/slides/#/69
  * https://youtu.be/s4qasWn_mFc
  * https://www.slideshare.net/RedHatDevelopers/istio-canaries-and-kubernetes
  
-== Maintainer
+# Maintainer
 
 Josef Adersberger (@adersberger)
 
-== License
+# License
 
 The software and documentation is provided under the MIT open source license,
 read the `LICENSE` file for details.
