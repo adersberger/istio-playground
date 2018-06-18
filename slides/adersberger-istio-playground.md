@@ -443,7 +443,10 @@ spec:
 # Canary Releases: A/B Testing
 
 ```zsh
-istioctl create -f samples/bookinfo/routing/route-rule-reviews-test-v2.yaml
+
+istioctl create -f samples/bookinfo/routing/route-rule-all-v1.yaml
+
+istioctl replace -f samples/bookinfo/routing/route-rule-reviews-test-v2.yaml
 
 open http://localhost/productpage
 ```
@@ -474,7 +477,7 @@ spec:
       weight: 50
 ```
 ```zsh
-istioctl replace -f samples/bookinfo/routing/route-rule-rev
+istioctl replace -f samples/bookinfo/routing/route-rule-reviews-50-v3.yaml
 ```
 ---
 # Canary Releases: Blue/Green
