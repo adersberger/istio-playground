@@ -5,11 +5,10 @@
 ![License](https://img.shields.io/packagist/l/doctrine/orm.svg)
 
 # Istio Playground
- * current Istio version on the playground: [0.8](https://istio.io/about/notes/0.8)
+ * current Istio version on the playground: [1.0](https://istio.io/about/notes/1.0)
  * [Slidedeck](https://github.com/adersberger/istio-by-example/blob/master/slides/)
  * [Istio Toys](https://istio.io/docs/tasks/)
- * Plan B (Istio cluster): [use GKE (account required)](https://istio.io/docs/setup/kubernetes/quick-start-gke-dm), [use Katacoda, only v0.7.1](https://katacoda.com/courses/istio)
- * Plan B (Load generator): [Fortio](https://github.com/istio/fortio)
+ * Plan B Kubernetes cluster: [use GKE (account required)](https://istio.io/docs/setup/kubernetes/quick-start-gke-dm), [use Katacoda](https://katacoda.com/courses/istio), [use Minikube](https://github.com/kubernetes/minikube)
 
 # References
  * Istio networking abstactions: https://istio.io/docs/reference/config/istio.networking.v1alpha3/

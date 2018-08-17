@@ -37,7 +37,7 @@ spec:
         app: elasticsearch
     spec:
       containers:
-      - image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.1.1
+      - image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.3.2
         name: elasticsearch
         resources:
           # need more cpu upon initialization, therefore burstable class
@@ -101,7 +101,7 @@ spec:
     spec:
       containers:
       - name: fluentd-es
-        image: gcr.io/google-containers/fluentd-elasticsearch:v2.0.1
+        image: gcr.io/google-containers/fluentd-elasticsearch:v2.2.0
         env:
         - name: FLUENTD_ARGS
           value: --no-supervisor -q
@@ -186,7 +186,7 @@ spec:
     spec:
       containers:
       - name: kibana
-        image: docker.elastic.co/kibana/kibana-oss:6.1.1
+        image: docker.elastic.co/kibana/kibana-oss:6.3.2
         resources:
           # need more cpu upon initialization, therefore burstable class
           limits:

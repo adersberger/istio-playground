@@ -79,7 +79,7 @@ and this is where Istio comes up:
 It unburdens cloud native applications to address crosscutting concerns by themselves.
 
 ---
-#Setting the Sails with Istio 0.8
+#Setting the Sails with Istio 1.0
 ![](../img/purple-3054804.jpg)
 
 ^ 
@@ -103,6 +103,8 @@ first task is to setup a Istio mesh
 # Istio Abstractions
 
 ![inline](../img/conceptmap.png)
+
+^ https://istio.io/docs/concepts/traffic-management/
 
 ---
 # Workshop Prerequisites
@@ -132,6 +134,7 @@ https://www.docker.com/community-edition
 
 ^ 
 it all begins with a k8s cluster
+For minikube users: minikube addons enable ingress
 
 ---
 # The Ultimate Guide to Fix Strange Kubernetes Behavior
@@ -160,12 +163,12 @@ open http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernet
 
  ```zsh
 curl -L https://git.io/getLatestIstio | sh -
-cd istio-0.8.0
+cd istio-1.0.0
 export PATH=$PWD/bin:$PATH
-istioctl
+istioctl version
 
 # deploy Istio
-# (demo setting, default depplyment is via Helm)
+# (demo setting, default deployment is via Helm)
 kubectl apply -f install/kubernetes/istio-demo.yaml
 kubectl get pods -n istio-system
 
@@ -179,7 +182,9 @@ kubectl get namespace -L istio-injection
 
 ```zsh
 kubectl apply -f samples/bookinfo/kube/bookinfo.yaml
+kubectl get pods
 istioctl create -f samples/bookinfo/routing/bookinfo-gateway.yaml
+istioctl get gateways
 open http://localhost/productpage
 ```
 
@@ -187,8 +192,10 @@ open http://localhost/productpage
 # Deploy Sample Application (BookInfo)
 
 ```zsh
-kubectl apply -f samples/bookinfo/kube/bookinfo.yaml
-istioctl create -f samples/bookinfo/routing/bookinfo-gateway.yaml
+kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
+kubectl get pods
+istioctl create -f samples/bookinfo/networking/bookinfo-gateway.yaml
+istioctl get gateways
 open http://localhost/productpage
 ```
 
@@ -251,7 +258,7 @@ spec:
 
 ![inline](../img/bookinfo-arch.png)
 
-[^1]: Istio BookInfo Sample (https://istio.io/docs/guides/bookinfo.html) 
+[^1]: Istio BookInfo Sample (https://istio.io/docs/examples/bookinfo) 
 
 ^
 The BookInfo sample application deployed is composed of four microservices:
@@ -307,9 +314,19 @@ open http://localhost:8088/dotviz
  ```zsh
 cd ..
 kubectl apply -f logging-stack.yaml
+kubectl get pods -n=logging
 kubectl expose deployment kibana --name=kibana-expose 
   --port=5601 --target-port=5601 --type=LoadBalancer -n=logging
 istioctl create -f fluentd-istio.yaml
+```
+
+^ see https://istio.io/docs/tasks/telemetry/fluentd
+
+---
+
+# Deploy Missing Observability Feature: Log Analysis (EFK)
+
+ ```zsh
 open http://localhost:5601/app/kibana
 ```
 
@@ -400,7 +417,7 @@ j - decrease rate by 100 RPS
 
 ![inline](../img/kiali-graph.png)
 
-^ https://github.com/kiali/kiali
+^ https://www.kiali.io/gettingstarted
 
 ---
 # Release Patterns
@@ -426,8 +443,8 @@ spec:
   http:
   - match:
     - headers:
-        cookie:
-          regex: "^(.*?;)?(user=jason)(;.*)?$"
+        end-user:
+          exact: jason
     route:
     - destination:
         host: reviews
@@ -437,17 +454,20 @@ spec:
         host: reviews
         subset: v1
 ```
-^ difference to Kubernetes: Istio is on Service-level, Kubernetes more on Pod-level
+^ 
+Send all traffic for the user "jason" to the reviews:v2, meaning they'll only see the black stars. 
+Difference to Kubernetes: Istio is on Service-level, Kubernetes more on Pod-level
 
 ---
 # Canary Releases: A/B Testing
 
 ```zsh
 
-istioctl create -f samples/bookinfo/routing/route-rule-all-v1.yaml
+istioctl create -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 
-istioctl replace -f samples/bookinfo/routing/route-rule-reviews-test-v2.yaml
+istioctl replace -f samples/bookinfo/networking/virtual-service-reviews-test-v2.yaml
 
+#open BookInfo application and login as user jason (password jason)
 open http://localhost/productpage
 ```
 
@@ -477,8 +497,11 @@ spec:
       weight: 50
 ```
 ```zsh
-istioctl replace -f samples/bookinfo/routing/route-rule-reviews-50-v3.yaml
+istioctl replace -f samples/bookinfo/networking/virtual-service-reviews-50-v3.yaml
 ```
+^
+The rule above ensures that 50% of the traffic goes to reviews:v1 (no stars), or reviews:v3 (red stars).
+
 ---
 # Canary Releases: Blue/Green
  ```yaml
@@ -496,7 +519,8 @@ spec:
         subset: v3
 ```
 ```zsh
-istioctl replace -f samples/bookinfo/routing/route-rule-reviews-v3.yaml
+istioctl replace -f samples/bookinfo/networking/virtual-service-reviews-v3.yaml
+istioctl get routerules
 ```
 
 ---
@@ -514,6 +538,8 @@ Time to Play!
 | API Specification | Connection Pooling  |  |  |
 
 https://istio.io/docs/tasks
+
+^ https://istio.io/about/feature-stages
 
 ---
 
