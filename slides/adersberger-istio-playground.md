@@ -286,22 +286,22 @@ Login is allowed with any combination of username and password.
 # Expose Istio Observability Tools
  ```zsh
 #Metrics: Prometheus
-kubectl expose deployment prometheus --name=prometheus-expose 
+kubectl expose deployment prometheus --name=prometheus-expose \
   --port=9090 --target-port=9090 --type=LoadBalancer -n=istio-system
 open http://localhost:9090/graph?g0.expr=istio_request_count
 
 #Metrics: Grafana
-kubectl expose deployment grafana --name=grafana-expose 
+kubectl expose deployment grafana --name=grafana-expose \
   --port=3000 --target-port=3000 --type=LoadBalancer -n=istio-system
 open http://localhost:3000/d/1/istio-dashboard
 
 #Tracing: Jaeger
-kubectl expose deployment istio-tracing --name=tracing-expose 
+kubectl expose deployment istio-tracing --name=tracing-expose \
   --port=16686 --target-port=16686 --type=LoadBalancer -n=istio-system
 open http://localhost:16686
 
 #Tracing: ServiceGraph
-kubectl expose service servicegraph --name=servicegraph-expose 
+kubectl expose service servicegraph --name=servicegraph-expose \
   --port=8088 --target-port=8088 --type=LoadBalancer -n=istio-system
 open http://localhost:8088/force/forcegraph.html
 open http://localhost:8088/dotviz
@@ -315,7 +315,7 @@ open http://localhost:8088/dotviz
 cd ..
 kubectl apply -f logging-stack.yaml
 kubectl get pods -n=logging
-kubectl expose deployment kibana --name=kibana-expose 
+kubectl expose deployment kibana --name=kibana-expose \
   --port=5601 --target-port=5601 --type=LoadBalancer -n=logging
 istioctl create -f fluentd-istio.yaml
 ```
@@ -417,8 +417,17 @@ j - decrease rate by 100 RPS
 
 ![inline](../img/kiali-graph.png)
 
-^ https://www.kiali.io/gettingstarted
-
+---
+# Observability Outlook: Kiali (setup)
+ ```zsh
+brew install gettext
+brew link --force gettext
+# follow k8s setup guide: https://www.kiali.io/gettingstarted
+kubectl expose deployment kiali --name=kiali-expose \
+  --port=20001 --target-port=20001 --type=LoadBalancer -n=istio-system
+open http://localhost:20001
+# login with admin/admin
+```
 ---
 # Release Patterns
 
