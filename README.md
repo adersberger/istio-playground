@@ -10,6 +10,12 @@
  * [Istio Toys](https://istio.io/docs/tasks/)
  * Plan B Kubernetes cluster: [use GKE (account required)](https://istio.io/docs/setup/kubernetes/quick-start-gke-dm), [use Katacoda](https://katacoda.com/courses/istio), [use Minikube](https://github.com/kubernetes/minikube)
 
+# Prerequisites
+ * [git client](https://git-scm.com)
+ * text editor ([VS.code](https://code.visualstudio.com) recommended)
+ * current [Docker Desktop](https://www.docker.com/products/docker-desktop) version with Kubernetes support and kubectl installed
+ * bash (no hard requirement but makes it easier to follow the tutorial)
+
 # References
  * Istio networking abstactions: https://istio.io/docs/reference/config/istio.networking.v1alpha3/
  * Istio workshop by Christian Posta: http://blog.christianposta.com/istio-workshop/slides/#/69
