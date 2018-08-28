@@ -10,7 +10,116 @@ background-color: 283D8F
 
 ---
 
+# Our network today
+
+ * Optimize first: Switch network off and on again and use 5GHz networking
+ * Plan A: Local installation
+ * Plan B: Use GKE clusters
+ * Plan C: Use Katacoda
+ * Plan D: Steamworks
+
+![fit](../img/snail.jpg)
+
+---
+# Workshop Prerequisites
+
+ * Bash
+ * git Client
+ * Text editor (like VS.Code)
+
+---
+# Baby Step: Grab the Code
+
+```sh
+git clone https://github.com/adersberger/istio-playground
+
+cd istio-playground/code
+```
+
+---
+# Baby Step: Install a (local) Kubernetes Cluster
+
+![fit](../img/docker.png)
+
+https://www.docker.com/community-edition
+
+ * Preferences: enable Kubernetes
+ * Preferences: increase resource usage to 3 cores and 8 GB memory
+
+^ 
+it all begins with a k8s cluster
+For minikube users: minikube addons enable ingress
+
+---
+# The Ultimate Guide to Fix Strange Kubernetes Behavior
+
+![inline](../img/docker-mac.png)
+
+---
+# Setup Kubernetes Environment
+ ```sh
+# Switch k8s context
+kubectl config use-context docker-for-desktop
+# Deploy k8s dashboard
+kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
+# Extract id of default service account token (referred as TOKENID)
+kubectl describe serviceaccount default
+# Grab token and insert it into k8s Dashboard UI auth dialog
+kubectl describe secret TOKENID
+# Start local proxy
+kubectl proxy --port=8001 &
+# Open k8s Dashboard
+open http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/login
+ ```
+
+^ attention: on some terminals you have to remove blank lines before pasting the token
+
+---
+# Deploy Istio
+
+ ```zsh
+curl -L https://git.io/getLatestIstio | sh -
+cd istio-1.0.1
+export PATH=$PWD/bin:$PATH
+istioctl version
+
+# deploy Istio
+# (demo setting, default deployment is via Helm)
+kubectl apply -f install/kubernetes/istio-demo.yaml
+kubectl get pods -n istio-system
+
+# label default namespace to be auto-sidecarred
+kubectl label namespace default istio-injection=enabled
+kubectl get namespace -L istio-injection
+```
+^ or manual download if no curl command is available
+https://github.com/istio/istio/releases. 
+Hint: Since Istio release 0.8 you can substitute `istioctl` with `kubectl`. We're still using `istioctl` for clarity purposes.
+
+---
+
+# Deploy Sample Application (BookInfo)
+
+```zsh
+kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
+kubectl get pods
+istioctl create -f samples/bookinfo/networking/bookinfo-gateway.yaml
+istioctl get gateways
+open http://localhost/productpage
+```
+
+---
+
+#Hands-on
+![](../img/hands-on.jpg)
+
+---
+
 # Why?
+
+---
+
+![fit](../img/emma.png)
 
 ---
 
@@ -101,85 +210,6 @@ https://istio.io/docs/concepts/security/mutual-tls.html
 ^ https://istio.io/docs/concepts/traffic-management/
 
 ---
-# Workshop Prerequisites
-
- * Bash
- * git Client
- * Text editor (like VS.Code)
-
----
-# Baby Step: Grab the Code
-
-```sh
-git clone https://github.com/adersberger/istio-playground
-
-cd istio-playground/code
-```
-
----
-# Baby Step: Install a (local) Kubernetes Cluster
-
-![fit](../img/docker.png)
-
-https://www.docker.com/community-edition
-
- * Preferences: enable Kubernetes
- * Preferences: increase resource usage to 3 cores and 8 GB memory
-
-^ 
-it all begins with a k8s cluster
-For minikube users: minikube addons enable ingress
-
----
-# The Ultimate Guide to Fix Strange Kubernetes Behavior
-
-![inline](../img/docker-mac.png)
-
----
-# Setup Kubernetes Environment
- ```sh
-# Switch k8s context
-kubectl config use-context docker-for-desktop
-# Deploy k8s dashboard
-kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
-# Extract id of default service account token (referred as TOKENID)
-kubectl describe serviceaccount default
-# Grab token and insert it into k8s Dashboard UI auth dialog
-kubectl describe secret TOKENID
-# Start local proxy
-kubectl proxy --port=8001 &
-# Open k8s Dashboard
-open http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/login
- ```
-
-^ attention: on some terminals you have to remove blank lines before pasting the token
-
----
-# Deploy Istio
-
- ```zsh
-curl -L https://git.io/getLatestIstio | sh -
-cd istio-1.0.1
-export PATH=$PWD/bin:$PATH
-istioctl version
-
-# deploy Istio
-# (demo setting, default deployment is via Helm)
-kubectl apply -f install/kubernetes/istio-demo.yaml
-kubectl get pods -n istio-system
-
-# label default namespace to be auto-sidecarred
-kubectl label namespace default istio-injection=enabled
-kubectl get namespace -L istio-injection
-```
-^ or manual download if no curl command is available
-https://github.com/istio/istio/releases
-
----
-#Hands-on
-![](../img/hands-on.jpg)
-
----
 
 # Sample Application: BookInfo[^1]
 
@@ -209,35 +239,11 @@ Login is allowed with any combination of username and password.
 [.background-color: #898787]
 
 ---
-# Deploy Sample Application (BookInfo)
-
-```zsh
-kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
-kubectl get pods
-istioctl create -f samples/bookinfo/networking/bookinfo-gateway.yaml
-istioctl get gateways
-open http://localhost/productpage
-```
-
----
-# Deploy Sample Application (BookInfo)
-
-```zsh
-kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
-kubectl get pods
-istioctl create -f samples/bookinfo/networking/bookinfo-gateway.yaml
-istioctl get gateways
-open http://localhost/productpage
-```
-
-__Hint: Since Istio release 0.8 you can substitute `istioctl` with `kubectl`. We're still using `istioctl` for clarity purposes.__
-
----
 
 ![fit](../img/kube-dash-screen.png)
 
 ---
-# bookinfo-gateway.yaml (1/2)
+# Bookinfo: Gateway
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
@@ -256,7 +262,7 @@ spec:
 ```
 
 ---
-# bookinfo-gateway.yaml (2/2)
+# Bookinfo: VirtualService
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -284,7 +290,22 @@ spec:
           number: 9080
 ```
 ---
-#Hands-on
+# Bookinfo: DestinationRule
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: productpage
+spec:
+  host: productpage
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+```
+
+---
+#Hands-on: Have a look around the YAMLs and Dashboard
 ![](../img/hands-on.jpg)
 
 ---
@@ -317,7 +338,7 @@ open http://localhost:8088/dotviz
 # Deploy Missing Observability Feature: Log Analysis (EFK)
 
  ```zsh
-cd ..
+cd .. #go to istio-playground/code
 kubectl apply -f logging-stack.yaml
 kubectl get pods -n=logging
 kubectl expose deployment kibana --name=kibana-expose \
