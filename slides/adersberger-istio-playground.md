@@ -17,8 +17,7 @@ background-color: 283D8F
 ![fit](../img/book.png)
 
 ^ 
-Istio and service meshes are a hype right now
-Our job is to ground this hype by providing real-life use cases
+Istio and service meshes are a hype right now - but this sustainable kind of hype driven by the fact the things are getting easier and less complex.
 
 ---
 
@@ -27,29 +26,23 @@ Our job is to ground this hype by providing real-life use cases
 
 ---
 
-![](../img/adersberger-istio-by-example/adersberger-istio-by-example.001.jpeg)
+![](../img/adersberger-istio-by-example/adersberger-istio-by-example.002.png)
 
 ^ 
 microservice applications do have a lot of crosscutting concerns to address to be cloud native
 
 ---
-![](../img/adersberger-istio-by-example/adersberger-istio-by-example.002.png)
+![](../img/adersberger-istio-by-example/adersberger-istio-by-example.003.png)
 
 ^ 
 these concerns can be addressed by libraries
 
 ---
 # Library Bloat
-![](../img/adersberger-istio-by-example/adersberger-istio-by-example.002.png)
+![](../img/adersberger-istio-by-example/adersberger-istio-by-example.003.png)
 
 ^ 
 but this leads to a library bloat
-
----
-
-![](../img/adersberger-istio-by-example/adersberger-istio-by-example.003.png)
-
-[.hide-footer]
 
 ---
 
@@ -59,27 +52,27 @@ but this leads to a library bloat
 
 ---
 
-![](../img/adersberger-istio-by-example/adersberger-istio-by-example.005.png)
-
-[.hide-footer]
-
----
-
 ![](../img/adersberger-istio-by-example/adersberger-istio-by-example.006.png)
 
-^ 
-so the idea is to move those concerns from the application side to the infrastructure side
+[.hide-footer]
 
 ---
 
 ![](../img/adersberger-istio-by-example/adersberger-istio-by-example.007.png)
 
 ^ 
-and this is where Istio comes up:
-It unburdens cloud native applications to address crosscutting concerns by themselves.
+so the idea is to move those concerns from the application side to the infrastructure side
 
 ---
-#Setting the Sails with Istio 1.0
+
+![](../img/adersberger-istio-by-example/adersberger-istio-by-example.008.png)
+
+^ 
+and this is where Istio comes up:
+It unburdens cloud native applications to address crosscutting concerns by themselves. Messaging will be addressed by Knative or NATS.
+
+---
+#Setting the Sails with Istio 1.0.1
 ![](../img/purple-3054804.jpg)
 
 ^ 
@@ -90,13 +83,14 @@ first task is to setup a Istio mesh
 ![](../img/istio-arch.png)
 
 ^ 
- * Pilot: Watches services and transforms this information in a canonical platform-agnostic model. The envoy configuration is then derived from this canonical model. Exposes the Rules API to add traffic management rules (used by Istioctl).
- * Envoy: Sidecar proxy per microservice that handles ingress/egress traffic
- * Mixer: Policy / precondition checks and telemetry. Highly scalable. Envoy caches policy rules and buffers telemetry data locally.
- https://istio.io/blog/2017/mixer-spof-myth.html
- * Ingress/Egress: Inbound and outbound gateway. Nothing more than an managed Envoy.
- * Citadel: CA for service-to-service authx and encryption. Certs are delivered as a secret volume mount. Workload identity is provided by SPIFFE.
- https://istio.io/docs/concepts/security/mutual-tls.html
+* Envoy: Sidecar proxy per microservice that handles inbound/outbound traffic within each Pod. Extended version of Envoy project.
+* Gateway: Inbound gateway / ingress. Nothing more than an managed Envoy.
+* Mixer: Policy / precondition checks and telemetry. Highly scalable. Envoy caches policy checks within the sidecare (level 1) and within envoy instances (level 2),  buffers telemetry data locally and centrally, and can be run in multiple instances. Mixer includes a flexible plugin model. 
+https://istio.io/blog/2017/mixer-spof-myth.html
+* Pilot: Pilot converts high level routing rules that control traffic behavior into Envoy-specific configurations, and propagates them to the sidecars at runtime.
+Watches services and transforms this information in a canonical platform-agnostic model (abstracting away from k8s, Nomad, Consul etc). The envoy configuration is then derived from this canonical model. Exposes the Rules API to add traffic management rules.
+* Citadel: CA for service-to-service authx and encryption. Certs are delivered as a secret volume mount. Workload identity is provided in SPIFFE format.
+https://istio.io/docs/concepts/security/mutual-tls.html
 
 [.hide-footer]
 ---
@@ -130,7 +124,7 @@ cd istio-playground/code
 https://www.docker.com/community-edition
 
  * Preferences: enable Kubernetes
- * Preferences: increase resource usage to 3 cores
+ * Preferences: increase resource usage to 3 cores and 8 GB memory
 
 ^ 
 it all begins with a k8s cluster
@@ -163,7 +157,7 @@ open http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernet
 
  ```zsh
 curl -L https://git.io/getLatestIstio | sh -
-cd istio-1.0.0
+cd istio-1.0.1
 export PATH=$PWD/bin:$PATH
 istioctl version
 
@@ -176,6 +170,41 @@ kubectl get pods -n istio-system
 kubectl label namespace default istio-injection=enabled
 kubectl get namespace -L istio-injection
 ```
+^ or manual download if no curl command is available
+https://github.com/istio/istio/releases
+
+---
+#Hands-on
+![](../img/hands-on.jpg)
+
+---
+
+# Sample Application: BookInfo[^1]
+
+![inline](../img/bookinfo-arch.png)
+
+[^1]: Istio BookInfo Sample (https://istio.io/docs/examples/bookinfo) 
+
+^
+The BookInfo sample application deployed is composed of four microservices:
+
+1) The productpage microservice is the homepage, populated using the details and reviews microservices.
+2) The details microservice contains the book information.
+3) The reviews microservice contains the book reviews. It uses the ratings microservice for the star rating. Default: load-balance between versions.
+4) The ratings microservice contains the book rating for a book review.
+
+The deployment included three versions of the reviews microservice to showcase different behaviour and routing:
+
+1) Version v1 doesn’t call the ratings service.
+2) Version v2 calls the ratings service and displays each rating as 1 to 5 black stars.
+3) Version v3 calls the ratings service and displays each rating as 1 to 5 red stars.
+
+The services communicate over HTTP using DNS for service discovery.
+
+Login is allowed with any combination of username and password.
+
+[.hide-footer]
+[.background-color: #898787]
 
 ---
 # Deploy Sample Application (BookInfo)
@@ -253,33 +282,8 @@ spec:
           number: 9080
 ```
 ---
-
-# Sample Application: BookInfo[^1]
-
-![inline](../img/bookinfo-arch.png)
-
-[^1]: Istio BookInfo Sample (https://istio.io/docs/examples/bookinfo) 
-
-^
-The BookInfo sample application deployed is composed of four microservices:
-
-1) The productpage microservice is the homepage, populated using the details and reviews microservices.
-2) The details microservice contains the book information.
-3) The reviews microservice contains the book reviews. It uses the ratings microservice for the star rating. Default: load-balance between versions.
-4) The ratings microservice contains the book rating for a book review.
-
-The deployment included three versions of the reviews microservice to showcase different behaviour and routing:
-
-1) Version v1 doesn’t call the ratings service.
-2) Version v2 calls the ratings service and displays each rating as 1 to 5 black stars.
-3) Version v3 calls the ratings service and displays each rating as 1 to 5 red stars.
-
-The services communicate over HTTP using DNS for service discovery.
-
-Login is allowed with any combination of username and password.
-
-[.hide-footer]
-[.background-color: #898787]
+#Hands-on
+![](../img/hands-on.jpg)
 
 ---
 
@@ -306,6 +310,9 @@ kubectl expose service servicegraph --name=servicegraph-expose \
 open http://localhost:8088/force/forcegraph.html
 open http://localhost:8088/dotviz
 ```
+---
+#Hands-on
+![](../img/hands-on.jpg)
 
 ---
 
@@ -383,6 +390,9 @@ spec:
      instances:
      - newlog.logentry
 ```
+---
+#Hands-on
+![](../img/hands-on.jpg)
 
 ---
 
@@ -413,12 +423,16 @@ k - increase rate by 100 RPS
 j - decrease rate by 100 RPS
 
 ---
+#Hands-on
+![](../img/hands-on.jpg)
+
+---
 # Observability Outlook: Kiali
 
 ![inline](../img/kiali-graph.png)
 
 ---
-# Observability Outlook: Kiali (setup)
+# Observability Outlook: Kiali (macOS setup)
  ```zsh
 brew install gettext
 brew link --force gettext
@@ -531,6 +545,9 @@ spec:
 istioctl replace -f samples/bookinfo/networking/virtual-service-reviews-v3.yaml
 istioctl get routerules
 ```
+---
+#Hands-on
+![](../img/hands-on.jpg)
 
 ---
 Time to Play!
@@ -543,13 +560,29 @@ Time to Play!
 | Traffic Shifting | Health Checks (active, passive) | Workload Identity | Traces|
 | Traffic Mirroring | Retries | Authentication Policies |  |
 | Service Discovery | Rate Limiting | CORS Handling |  |
-| Ingress, Egress | Delay & Fault Injection |  |  |
+| Ingress, Egress | Delay & Fault Injection | TLS Termination, SNI |  |
 | API Specification | Connection Pooling  |  |  |
+| Multicluster Mesh |  |  |  |
 
 https://istio.io/docs/tasks
+https://istio.io/about/feature-stages
 
-^ https://istio.io/about/feature-stages
+---
+#Hands-on
+![](../img/hands-on.jpg)
 
 ---
 
 ![](../img/final-slide.png)
+
+---
+#FAQ
+
+*Q: How does the Envoy proxy intercept requests?*
+A: With IPtable rules (alls rules pointing to envoy)
+*Q: How does the auto-sidecar magic work?*
+A: With an Istio admission controller enhancing the deployments
+*Q: How can I list all Istio custom resource definitions and commands?*
+A: `kubectl api-resources`
+*Q: I can't see any metrics, logs, traces. What should I do?*
+A: Restart `istio-telemetry` Pod
