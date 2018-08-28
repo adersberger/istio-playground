@@ -13,7 +13,7 @@
 # Prerequisites
  * [git client](https://git-scm.com)
  * text editor ([VS.code](https://code.visualstudio.com) recommended)
- * current [Docker Desktop](https://www.docker.com/products/docker-desktop) version with Kubernetes support and kubectl installed
+ * current [Docker Desktop](https://www.docker.com/products/docker-desktop) version with Kubernetes support, at least 8GB Memory configured, and kubectl installed
  * bash (no hard requirement but makes it easier to follow the tutorial)
 
 # References
