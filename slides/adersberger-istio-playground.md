@@ -152,6 +152,8 @@ kubectl proxy --port=8001 &
 open http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/login
  ```
 
+^ attention: on some terminals you have to remove blank lines before pasting the token
+
 ---
 # Deploy Istio
 
@@ -210,9 +212,9 @@ Login is allowed with any combination of username and password.
 # Deploy Sample Application (BookInfo)
 
 ```zsh
-kubectl apply -f samples/bookinfo/kube/bookinfo.yaml
+kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
 kubectl get pods
-istioctl create -f samples/bookinfo/routing/bookinfo-gateway.yaml
+istioctl create -f samples/bookinfo/networking/bookinfo-gateway.yaml
 istioctl get gateways
 open http://localhost/productpage
 ```
@@ -292,7 +294,6 @@ spec:
 #Metrics: Prometheus
 kubectl expose deployment prometheus --name=prometheus-expose \
   --port=9090 --target-port=9090 --type=LoadBalancer -n=istio-system
-open http://localhost:9090/graph?g0.expr=istio_request_count
 
 #Metrics: Grafana
 kubectl expose deployment grafana --name=grafana-expose \
@@ -310,9 +311,6 @@ kubectl expose service servicegraph --name=servicegraph-expose \
 open http://localhost:8088/force/forcegraph.html
 open http://localhost:8088/dotviz
 ```
----
-#Hands-on
-![](../img/hands-on.jpg)
 
 ---
 
@@ -390,9 +388,6 @@ spec:
      instances:
      - newlog.logentry
 ```
----
-#Hands-on
-![](../img/hands-on.jpg)
 
 ---
 
@@ -449,8 +444,40 @@ open http://localhost:20001
 
 ^
 B. Ibryam and R. Huss, Kubernetes Patterns, https://leanpub.com/k8spatterns
+(1) Blue/Green: Two deployments in parallel for fast rollbacks. Switch traffic to new version but undeploy old version later when you are confident that the new version works.
+(2) Rolling Upgrades: Gradually shifting traffic from one version to another version
+(3) Canary Releases: First perform an A/B test between the old and the new version. If this is successful perform a rolling upgrade ending with a blue/green deployment. (champions league of deployment patterns)
+
 
 [.hide-footer]
+
+---
+
+# Sample Application Recap
+
+![inline](../img/bookinfo-arch.png)
+
+---
+# Sample Desination Rule
+
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: reviews
+spec:
+  host: reviews
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+  - name: v3
+    labels:
+      version: v3
+```
 
 ---
 # Canary Releases: A/B Testing
@@ -486,7 +513,11 @@ Difference to Kubernetes: Istio is on Service-level, Kubernetes more on Pod-leve
 
 ```zsh
 
+cd istio-1.0.1
+
 istioctl create -f samples/bookinfo/networking/virtual-service-all-v1.yaml
+
+istioctl create -f samples/bookinfo/networking/destination-rule-all.yaml
 
 istioctl replace -f samples/bookinfo/networking/virtual-service-reviews-test-v2.yaml
 
@@ -585,4 +616,4 @@ A: With an Istio admission controller enhancing the deployments
 *Q: How can I list all Istio custom resource definitions and commands?*
 A: `kubectl api-resources`
 *Q: I can't see any metrics, logs, traces. What should I do?*
-A: Restart `istio-telemetry` Pod
+A: Restart `istio-telemetry` Deploment or `kubectl replace -f fluentd-istio.yaml`
