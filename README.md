@@ -3,6 +3,7 @@
 ![Maintenance](https://img.shields.io/badge/maintained-yes-green.svg)
 ![Istio Version](https://img.shields.io/badge/istio--version-1.0.1-blue.svg)
 ![License](https://img.shields.io/packagist/l/doctrine/orm.svg)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fadersberger%2Fistio-playground.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fadersberger%2Fistio-playground?ref=badge_shield)
 
 # Istio Playground
  * current Istio version on the playground: [1.0.1](https://istio.io/about/notes/1.0)
@@ -30,3 +31,6 @@ Josef Adersberger (@adersberger)
 
 The software and documentation is provided under the MIT open source license,
 read the `LICENSE` file for details.
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fadersberger%2Fistio-playground.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fadersberger%2Fistio-playground?ref=badge_large)
